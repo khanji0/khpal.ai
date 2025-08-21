@@ -66,12 +66,18 @@ class KhpalLanding {
     
     // Setup event listeners
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         // Email form submission with AJAX to prevent redirect
         if (this.emailForm) {
+            console.log('Form found, adding submit listener');
             this.emailForm.addEventListener('submit', (e) => {
+                console.log('Form submitted, preventing default');
                 e.preventDefault(); // Prevent default form submission
                 this.handleFormSubmit();
             });
+        } else {
+            console.log('Form not found!');
         }
         
         // Email input events
