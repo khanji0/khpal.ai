@@ -132,15 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
         hideMessages();
     });
 
-    // Cursor glow effect
-    const cursorGlow = document.getElementById('cursorGlow');
-    if (cursorGlow) {
-        document.addEventListener('mousemove', function(e) {
-            cursorGlow.style.left = (e.clientX - 192) + 'px';
-            cursorGlow.style.top = (e.clientY - 192) + 'px';
-        });
-    }
-
     // Create animated background particles
     const particlesContainer = document.querySelector('.particles-container');
     if (particlesContainer) {
