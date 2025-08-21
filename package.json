@@ -1,0 +1,29 @@
+{
+  "name": "khpal-ai-waitlist",
+  "version": "1.0.0",
+  "description": "Professional waitlist system for khpal.ai - Personal AI Agents",
+  "main": "src-server.js",
+  "scripts": {
+    "start": "node src-server.js",
+    "dev": "nodemon src-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "waitlist",
+    "ai",
+    "productivity",
+    "personal-agents"
+  ],
+  "author": "jibran khan",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

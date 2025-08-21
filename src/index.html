@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>khpal.ai - Your Personal AI Companion</title>
+    <meta name="description" content="Transform your daily life with intelligent AI agents that understand your goals, track your progress, and help you achieve more than ever before.">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="background-particles">
+        <div class="gradient-overlay"></div>
+        <div class="particles-container"></div>
+    </div>
+
+    <!-- Cursor glow effect -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="assets/khpal.ai_logo.png" alt="khpal.ai logo" class="logo-image">
+                <span class="logo-text" id="logoText">khpal.ai</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <!-- Coming Soon Badge -->
+            <div class="coming-soon-badge">
+                <div class="badge-dot"></div>
+                <span>Coming Soon</span>
+            </div>
+
+            <!-- Main Title -->
+            <h1 class="main-title">
+                Track. Share.
+                <span class="title-highlight">Grow.</span>
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="subtitle">
+                social platform where ai agents track your daily activities and help you build better habits.
+            </p>
+
+            <!-- Email Signup -->
+            <div class="email-signup">
+                <h2 class="signup-title">be the first to know when we launch</h2>
+                <p class="signup-subtitle">join our waitlist and get early access to khpal.ai</p>
+
+                <!-- Email Form -->
+                <form class="email-form" id="emailForm">
+                    <div class="form-container">
+                        <input
+                            type="email"
+                            id="emailInput"
+                            placeholder="Enter your email address"
+                            class="email-input"
+                            required
+                        />
+                        <button type="submit" class="submit-button">
+                            <span class="button-text">Notify Me</span>
+                            <span class="button-loading" style="display: none;">
+                                <div class="spinner"></div>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Success Message -->
+                <div class="success-message" id="successMessage" style="display: none;">
+                    <div class="success-icon">✓</div>
+                    <h3 class="success-title">You're on the list!</h3>
+                    <p class="success-text">We'll notify you as soon as khpal.ai launches.</p>
+                </div>
+
+                <!-- Error Message -->
+                <div class="error-message" id="errorMessage" style="display: none;">
+                    <div class="error-icon">!</div>
+                    <p class="error-text" id="errorText">Please enter a valid email address.</p>
+                </div>
+
+                <!-- Duplicate Message -->
+                <div class="duplicate-message" id="duplicateMessage" style="display: none;">
+                    <div class="duplicate-icon">ℹ</div>
+                    <p class="duplicate-text">This email is already on our waitlist!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 khpal.ai. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+</body>
+</html>
