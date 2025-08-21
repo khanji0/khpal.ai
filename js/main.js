@@ -66,17 +66,14 @@ class KhpalLanding {
     
     // Setup event listeners
     setupEventListeners() {
-        // Email form submission - let Formspree handle it
+        // Email form submission - let Formspree handle it completely
         if (this.emailForm) {
             this.emailForm.addEventListener('submit', (e) => {
                 // Show loading state
                 this.showLoading();
                 
                 // Let the form submit naturally to Formspree
-                setTimeout(() => {
-                    this.showSuccess();
-                    this.hideLoading();
-                }, 1000);
+                // Don't prevent default or interfere
             });
         }
         
