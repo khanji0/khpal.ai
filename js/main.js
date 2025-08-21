@@ -1,117 +1,77 @@
-// Main JavaScript for khpal.ai landing page
-class KhpalLanding {
-    constructor() {
-        this.email = '';
-        this.isSubmitted = false;
-        this.mousePosition = { x: 0, y: 0 };
-        
-        // DOM elements
-        this.cursorGlow = document.getElementById('cursorGlow');
-        this.emailForm = document.getElementById('emailForm');
-        this.emailInput = document.getElementById('emailInput');
-        this.submitButton = document.querySelector('.submit-button');
-        this.buttonText = document.querySelector('.button-text');
-        this.buttonLoading = document.querySelector('.button-loading');
-        this.successMessage = document.getElementById('successMessage');
-        this.errorMessage = document.getElementById('errorMessage');
-        this.duplicateMessage = document.getElementById('duplicateMessage');
-        this.errorText = document.getElementById('errorText');
-        this.particlesContainer = document.querySelector('.particles-container');
-        
-        this.init();
+// Simple JavaScript for khpal.ai landing page
+document.addEventListener('DOMContentLoaded', function() {
+    const emailForm = document.getElementById('emailForm');
+    const emailInput = document.getElementById('emailInput');
+    const submitButton = document.querySelector('.submit-button');
+    const buttonText = document.querySelector('.button-text');
+    const buttonLoading = document.querySelector('.button-loading');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+
+    // Simple email validation
+    function isValidEmail(email) {
+        return email.includes('@') && email.includes('.');
     }
-    
-    init() {
-        this.createParticles();
-        this.setupEventListeners();
-        this.setupCursorEffect();
-        this.setupAnimations();
+
+    // Show loading state
+    function showLoading() {
+        submitButton.disabled = true;
+        buttonText.style.display = 'none';
+        buttonLoading.style.display = 'flex';
     }
-    
-    // Create animated background particles
-    createParticles() {
-        const particleCount = 20;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            
-            // Random positioning
-            particle.style.left = `${Math.random() * 100}%`;
-            particle.style.top = `${Math.random() * 100}%`;
-            
-            // Random animation delays and durations
-            const delay = Math.random() * 3;
-            const duration = 2 + Math.random() * 3;
-            
-            particle.style.animationDelay = `${delay}s`;
-            particle.style.animationDuration = `${duration}s`;
-            
-            this.particlesContainer.appendChild(particle);
-        }
+
+    // Hide loading state
+    function hideLoading() {
+        submitButton.disabled = false;
+        buttonText.style.display = 'inline';
+        buttonLoading.style.display = 'none';
     }
-    
-    // Setup cursor glow effect
-    setupCursorEffect() {
-        document.addEventListener('mousemove', (e) => {
-            this.mousePosition.x = e.clientX;
-            this.mousePosition.y = e.clientY;
-            
-            if (this.cursorGlow) {
-                this.cursorGlow.style.left = `${e.clientX - 192}px`;
-                this.cursorGlow.style.top = `${e.clientY - 192}px`;
-            }
-        });
+
+    // Hide all messages
+    function hideMessages() {
+        successMessage.style.display = 'none';
+        errorMessage.style.display = 'none';
     }
-    
-    // Setup event listeners
-    setupEventListeners() {
-        // Email form submission with AJAX to prevent redirect
-        if (this.emailForm) {
-            this.emailForm.addEventListener('submit', (e) => {
-                e.preventDefault(); // Prevent default form submission
-                this.handleFormSubmit();
-            });
-        }
-        
-        // Email input events
-        if (this.emailInput) {
-            this.emailInput.addEventListener('input', () => this.hideMessages());
-        }
+
+    // Show success message
+    function showSuccess() {
+        hideMessages();
+        successMessage.style.display = 'flex';
+        emailInput.value = '';
     }
-    
-    // Handle form submission with AJAX
-    async handleFormSubmit() {
-        const email = this.emailInput.value.trim();
+
+    // Show error message
+    function showError(message) {
+        hideMessages();
+        errorText.textContent = message;
+        errorMessage.style.display = 'flex';
+    }
+
+    // Handle form submission
+    emailForm.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Prevent form from submitting normally
         
-        console.log('Form submission started for email:', email);
+        const email = emailInput.value.trim();
         
-        // Validate email
+        // Basic validation
         if (!email) {
-            this.showError('please enter your email address');
+            showError('Please enter your email address');
             return;
         }
         
-        if (!this.validateEmail(email)) {
-            this.showError('please enter a valid email address');
+        if (!isValidEmail(email)) {
+            showError('Please enter a valid email address');
             return;
         }
         
-        // Check for duplicates in localStorage
-        if (this.isEmailRegistered(email)) {
-            this.showDuplicate();
-            return;
-        }
-        
-        // Show loading state
-        this.showLoading();
+        // Show loading
+        showLoading();
         
         try {
-            // Submit to Formspree using AJAX
+            // Submit to Formspree
             const formData = new FormData();
             formData.append('email', email);
-            
-            console.log('Submitting to Formspree:', email);
             
             const response = await fetch('https://formspree.io/f/mzzvlwgw', {
                 method: 'POST',
@@ -121,305 +81,70 @@ class KhpalLanding {
                 }
             });
             
-            console.log('Formspree response status:', response.status);
-            
             if (response.ok) {
-                // Store email locally to prevent duplicates
-                this.storeEmail(email);
-                
-                // Show success message
-                this.showSuccess();
-                
-                // Track analytics
-                this.trackAnalytics('waitlist_signup', email);
-                
-                console.log(`Successfully added ${email} to waitlist`);
-                console.log('Email stored in localStorage:', this.getStoredEmails());
+                showSuccess();
+                console.log('Email submitted successfully:', email);
             } else {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('Formspree error response:', errorData);
-                throw new Error(`Failed to submit email: ${response.status}`);
+                throw new Error('Failed to submit');
             }
         } catch (error) {
-            console.error('Formspree submission error:', error);
-            
-            // Fallback: Store email locally even if Formspree fails
-            console.log('Formspree failed, storing email locally as fallback');
-            this.storeEmail(email);
-            this.showSuccess();
-            this.trackAnalytics('waitlist_signup_fallback', email);
-            
-            console.log('Email stored locally as fallback:', this.getStoredEmails());
+            console.error('Error submitting email:', error);
+            showError('Something went wrong. Please try again.');
         } finally {
-            this.hideLoading();
+            hideLoading();
         }
-    }
-        
-        // Logo text animation
-        const logoText = document.getElementById('logoText');
-        if (logoText) {
-            logoText.addEventListener('mouseenter', () => {
-                logoText.style.animationDuration = '2s';
-            });
-            
-            logoText.addEventListener('mouseleave', () => {
-                logoText.style.animationDuration = '4s';
-            });
-        }
-    }
-    
-    // Setup page animations
-    setupAnimations() {
-        // Add entrance animations
-        const elements = document.querySelectorAll('.coming-soon-badge, .main-title, .subtitle, .email-signup');
-        
-        elements.forEach((element, index) => {
-            element.style.opacity = '0';
-            element.style.transform = 'translateY(30px)';
-            element.style.transition = 'all 0.6s ease';
-            
-            setTimeout(() => {
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0)';
-            }, 200 + (index * 100));
-        });
-    }
-    
-    // Validate email format
-    validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-    
-    // Show loading state
-    showLoading() {
-        if (this.submitButton) {
-            this.submitButton.disabled = true;
-        }
-        if (this.buttonText) {
-            this.buttonText.style.display = 'none';
-        }
-        if (this.buttonLoading) {
-            this.buttonLoading.style.display = 'flex';
-        }
-    }
-    
-    // Hide loading state
-    hideLoading() {
-        if (this.submitButton) {
-            this.submitButton.disabled = false;
-        }
-        if (this.buttonText) {
-            this.buttonText.style.display = 'inline';
-        }
-        if (this.buttonLoading) {
-            this.buttonLoading.style.display = 'none';
-        }
-    }
-    
-    // Hide all messages
-    hideMessages() {
-        if (this.successMessage) this.successMessage.style.display = 'none';
-        if (this.errorMessage) this.errorMessage.style.display = 'none';
-        if (this.duplicateMessage) this.duplicateMessage.style.display = 'none';
-    }
-    
-    // Show success message
-    showSuccess() {
-        this.hideMessages();
-        if (this.successMessage) {
-            this.successMessage.style.display = 'flex';
-        }
-        if (this.emailInput) {
-            this.emailInput.value = '';
-            this.emailInput.blur();
-        }
-        this.isSubmitted = true;
-    }
-    
-    // Show error message
-    showError(message) {
-        this.hideMessages();
-        if (this.errorText) {
-            this.errorText.textContent = message;
-        }
-        if (this.errorMessage) {
-            this.errorMessage.style.display = 'flex';
-        }
-        if (this.emailInput) {
-            this.emailInput.focus();
-        }
-    }
-    
-    // Show duplicate message
-    showDuplicate() {
-        this.hideMessages();
-        if (this.duplicateMessage) {
-            this.duplicateMessage.style.display = 'flex';
-        }
-        if (this.emailInput) {
-            this.emailInput.value = '';
-            this.emailInput.blur();
-        }
-    }
-    
-    // Store email in localStorage
-    storeEmail(email) {
-        try {
-            const emails = this.getStoredEmails();
-            if (!emails.includes(email.toLowerCase())) {
-                emails.push(email.toLowerCase());
-                localStorage.setItem('khpal_waitlist_emails', JSON.stringify(emails));
-                return true;
-            }
-            return false;
-        } catch (error) {
-            console.error('Error storing email:', error);
-            return false;
-        }
-    }
-    
-    // Get stored emails from localStorage
-    getStoredEmails() {
-        try {
-            const stored = localStorage.getItem('khpal_waitlist_emails');
-            return stored ? JSON.parse(stored) : [];
-        } catch (error) {
-            console.error('Error reading stored emails:', error);
-            return [];
-        }
-    }
-    
-    // Check if email is already registered
-    isEmailRegistered(email) {
-        const emails = this.getStoredEmails();
-        return emails.includes(email.toLowerCase());
-    }
-    
-    // Debug function to show all stored emails
-    debugShowStoredEmails() {
-        const emails = this.getStoredEmails();
-        console.log('All stored emails in localStorage:', emails);
-        return emails;
-    }
-    
-    // Handle form submission
-    async handleSubmit(e) {
-        e.preventDefault();
-        
-        const email = this.emailInput ? this.emailInput.value.trim() : '';
-        
-        // Validate email
-        if (!email) {
-            this.showError('please enter your email address');
-            return;
-        }
-        
-        if (!this.validateEmail(email)) {
-            this.showError('please enter a valid email address');
-            return;
-        }
-        
-        // Show loading state
-        this.showLoading();
-        
-        try {
-            // Submit to backend
-            const result = await this.submitToBackend(email);
-            
-            this.showSuccess();
-            
-            // Track analytics
-            this.trackAnalytics('waitlist_signup', email);
-            
-            console.log(`Successfully added ${email} to waitlist. Total subscribers: ${result.totalSubscribers || 1}`);
-            
-        } catch (error) {
-            console.error('Submission error:', error);
-            
-            if (error.message === 'duplicate') {
-                this.showDuplicate();
-            } else {
-                this.showError(error.message || 'something went wrong. please try again.');
-            }
-        } finally {
-            this.hideLoading();
-        }
-    }
-    
-    // Track analytics
-    trackAnalytics(event, email) {
-        // Google Analytics
-        if (typeof gtag !== 'undefined') {
-            gtag('event', event, {
-                'event_category': 'waitlist',
-                'event_label': email
-            });
-        }
-        
-        // Mixpanel
-        if (typeof mixpanel !== 'undefined') {
-            mixpanel.track(event, {
-                email: email,
-                timestamp: new Date().toISOString()
-            });
-        }
-        
-        // Console log for development
-        console.log(`Analytics: ${event} - ${email}`);
-    }
-}
+    });
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const khpalApp = new KhpalLanding();
-    
-    // Make debug function globally accessible
-    window.showStoredEmails = () => khpalApp.debugShowStoredEmails();
-    window.clearStoredEmails = () => {
-        localStorage.removeItem('khpal_waitlist_emails');
-        console.log('All stored emails cleared');
-    };
-    
-    // Add some additional interactive effects
-    const addInteractiveEffects = () => {
-        // Parallax effect for particles
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const particles = document.querySelectorAll('.particle');
-            
-            particles.forEach((particle, index) => {
-                const speed = 0.5 + (index * 0.1);
-                particle.style.transform = `translateY(${scrolled * speed}px)`;
-            });
+    // Hide messages when user starts typing
+    emailInput.addEventListener('input', hideMessages);
+
+    // Cursor glow effect
+    const cursorGlow = document.getElementById('cursorGlow');
+    if (cursorGlow) {
+        document.addEventListener('mousemove', function(e) {
+            cursorGlow.style.left = (e.clientX - 192) + 'px';
+            cursorGlow.style.top = (e.clientY - 192) + 'px';
+        });
+    }
+
+    // Create animated background particles
+    const particlesContainer = document.querySelector('.particles-container');
+    if (particlesContainer) {
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 3 + 's';
+            particle.style.animationDuration = (2 + Math.random() * 3) + 's';
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    // Logo text animation
+    const logoText = document.getElementById('logoText');
+    if (logoText) {
+        logoText.addEventListener('mouseenter', function() {
+            logoText.style.animationDuration = '2s';
         });
         
-        // Add hover effects to buttons
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-            button.addEventListener('mouseenter', () => {
-                button.style.transform = 'scale(1.05)';
-            });
-            
-            button.addEventListener('mouseleave', () => {
-                button.style.transform = 'scale(1)';
-            });
+        logoText.addEventListener('mouseleave', function() {
+            logoText.style.animationDuration = '4s';
         });
+    }
+
+    // Page animations
+    const elements = document.querySelectorAll('.coming-soon-badge, .main-title, .subtitle, .email-signup');
+    elements.forEach(function(element, index) {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = 'all 0.6s ease';
         
-        // Add focus effects to inputs
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                input.style.transform = 'scale(1.02)';
-            });
-            
-            input.addEventListener('blur', () => {
-                input.style.transform = 'scale(1)';
-            });
-        });
-    };
-    
-    addInteractiveEffects();
+        setTimeout(function() {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, 200 + (index * 100));
+    });
 });
 
 // Add smooth scrolling for anchor links
