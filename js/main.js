@@ -190,31 +190,28 @@ class KhpalLanding {
         }
     }
     
-    // Submit to backend
+    // Submit to Formspree
     async submitToBackend(email) {
         try {
-            const response = await fetch('/api/waitlist', {
+            const formData = new FormData();
+            formData.append('email', email);
+            
+            const response = await fetch('https://formspree.io/f/mzzvlwgw', {
                 method: 'POST',
+                body: formData,
                 headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email })
+                    'Accept': 'application/json'
+                }
             });
             
-            const data = await response.json();
-            
-            if (!response.ok) {
-                if (response.status === 409) {
-                    throw new Error('duplicate');
-                }
-                throw new Error(data.message || 'Network error. Please try again.');
+            if (response.ok) {
+                return { success: true, message: 'Email submitted successfully' };
+            } else {
+                throw new Error('Failed to submit email');
             }
-            
-            return data;
         } catch (error) {
-            // If backend is not available, simulate success
-            console.log('Backend not available, simulating success');
-            return { success: true, totalSubscribers: 1 };
+            console.error('Formspree submission error:', error);
+            throw new Error('Network error. Please try again.');
         }
     }
     
