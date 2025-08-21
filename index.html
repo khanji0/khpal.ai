@@ -102,5 +102,36 @@
 
     <!-- Scripts -->
     <script src="js/main.js"></script>
+    
+    <!-- Test Script -->
+    <script>
+        console.log('Test script loaded');
+        
+        // Simple form test
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            const form = document.getElementById('emailForm');
+            const button = document.querySelector('.submit-button');
+            
+            if (form) {
+                console.log('Form found');
+                
+                // Add click handler to button
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Button clicked!');
+                    
+                    const email = document.getElementById('emailInput').value;
+                    console.log('Email:', email);
+                    
+                    // Show success message
+                    document.getElementById('successMessage').style.display = 'flex';
+                });
+            } else {
+                console.log('Form not found');
+            }
+        });
+    </script>
 </body>
 </html>
