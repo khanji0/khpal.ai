@@ -66,10 +66,76 @@ class KhpalLanding {
     
     // Setup event listeners
     setupEventListeners() {
-        // Remove all form interference - let Formspree handle everything
-        // Email input events only
+        // Email form submission with AJAX to prevent redirect
+        if (this.emailForm) {
+            this.emailForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Prevent default form submission
+                this.handleFormSubmit();
+            });
+        }
+        
+        // Email input events
         if (this.emailInput) {
             this.emailInput.addEventListener('input', () => this.hideMessages());
+        }
+    }
+    
+    // Handle form submission with AJAX
+    async handleFormSubmit() {
+        const email = this.emailInput.value.trim();
+        
+        // Validate email
+        if (!email) {
+            this.showError('please enter your email address');
+            return;
+        }
+        
+        if (!this.validateEmail(email)) {
+            this.showError('please enter a valid email address');
+            return;
+        }
+        
+        // Check for duplicates in localStorage
+        if (this.isEmailRegistered(email)) {
+            this.showDuplicate();
+            return;
+        }
+        
+        // Show loading state
+        this.showLoading();
+        
+        try {
+            // Submit to Formspree using AJAX
+            const formData = new FormData();
+            formData.append('email', email);
+            
+            const response = await fetch('https://formspree.io/f/mzzvlwgw', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                // Store email locally to prevent duplicates
+                this.storeEmail(email);
+                
+                // Show success message
+                this.showSuccess();
+                
+                // Track analytics
+                this.trackAnalytics('waitlist_signup', email);
+                
+                console.log(`Successfully added ${email} to waitlist`);
+            } else {
+                throw new Error('Failed to submit email');
+            }
+        } catch (error) {
+            console.error('Formspree submission error:', error);
+            this.showError('something went wrong. please try again.');
+        } finally {
+            this.hideLoading();
         }
     }
         
@@ -181,29 +247,37 @@ class KhpalLanding {
         }
     }
     
-    // Submit to Formspree
-    async submitToBackend(email) {
+    // Store email in localStorage
+    storeEmail(email) {
         try {
-            const formData = new FormData();
-            formData.append('email', email);
-            
-            const response = await fetch('https://formspree.io/f/mzzvlwgw', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                return { success: true, message: 'Email submitted successfully' };
-            } else {
-                throw new Error('Failed to submit email');
+            const emails = this.getStoredEmails();
+            if (!emails.includes(email.toLowerCase())) {
+                emails.push(email.toLowerCase());
+                localStorage.setItem('khpal_waitlist_emails', JSON.stringify(emails));
+                return true;
             }
+            return false;
         } catch (error) {
-            console.error('Formspree submission error:', error);
-            throw new Error('Network error. Please try again.');
+            console.error('Error storing email:', error);
+            return false;
         }
+    }
+    
+    // Get stored emails from localStorage
+    getStoredEmails() {
+        try {
+            const stored = localStorage.getItem('khpal_waitlist_emails');
+            return stored ? JSON.parse(stored) : [];
+        } catch (error) {
+            console.error('Error reading stored emails:', error);
+            return [];
+        }
+    }
+    
+    // Check if email is already registered
+    isEmailRegistered(email) {
+        const emails = this.getStoredEmails();
+        return emails.includes(email.toLowerCase());
     }
     
     // Handle form submission
