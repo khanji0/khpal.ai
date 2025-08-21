@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3001; // Different port to avoid conflicts
 app.use(cors());
 app.use(express.json());
 app.use(express.static('src')); // Serve static files from src directory
+app.use(express.static('.')); // Also serve files from root directory
 
 // Data file path
 const EMAILS_FILE = path.join(__dirname, 'waitlist_emails.json');
