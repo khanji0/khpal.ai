@@ -54,17 +54,15 @@
                 <p class="signup-subtitle">join our waitlist and get early access to khpal.ai</p>
 
                 <!-- Email Form -->
-                <form class="email-form" id="emailForm">
+                <form class="email-form" id="emailForm" onsubmit="return false;">
                     <div class="form-container">
                         <input
                             type="email"
                             id="emailInput"
-                            name="email"
                             placeholder="Enter your email address"
                             class="email-input"
-                            required
                         />
-                        <button type="submit" class="submit-button">
+                        <button type="button" class="submit-button" id="submitButton">
                             <span class="button-text">Notify Me</span>
                             <span class="button-loading" style="display: none;">
                                 <div class="spinner"></div>

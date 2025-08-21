@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const emailForm = document.getElementById('emailForm');
     const emailInput = document.getElementById('emailInput');
-    const submitButton = document.querySelector('.submit-button');
+    const submitButton = document.getElementById('submitButton');
     const buttonText = document.querySelector('.button-text');
     const buttonLoading = document.querySelector('.button-loading');
     const successMessage = document.getElementById('successMessage');
@@ -48,9 +48,9 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.style.display = 'flex';
     }
 
-    // Handle form submission
-    emailForm.addEventListener('submit', async function(e) {
-        e.preventDefault(); // Prevent form from submitting normally
+    // Handle button click
+    const submitButton = document.getElementById('submitButton');
+    submitButton.addEventListener('click', async function(e) {
         
         const email = emailInput.value.trim();
         
@@ -97,6 +97,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Hide messages when user starts typing
     emailInput.addEventListener('input', hideMessages);
+    
+    // Handle Enter key press
+    emailInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitButton.click();
+        }
+    });
 
     // Cursor glow effect
     const cursorGlow = document.getElementById('cursorGlow');
