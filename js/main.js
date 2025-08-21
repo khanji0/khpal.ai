@@ -66,21 +66,12 @@ class KhpalLanding {
     
     // Setup event listeners
     setupEventListeners() {
-        // Email form submission - let Formspree handle it completely
-        if (this.emailForm) {
-            this.emailForm.addEventListener('submit', (e) => {
-                // Show loading state
-                this.showLoading();
-                
-                // Let the form submit naturally to Formspree
-                // Don't prevent default or interfere
-            });
-        }
-        
-        // Email input events
+        // Remove all form interference - let Formspree handle everything
+        // Email input events only
         if (this.emailInput) {
             this.emailInput.addEventListener('input', () => this.hideMessages());
         }
+    }
         
         // Logo text animation
         const logoText = document.getElementById('logoText');
