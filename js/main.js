@@ -66,20 +66,23 @@ class KhpalLanding {
     
     // Setup event listeners
     setupEventListeners() {
-        // Email form submission
+        // Email form submission - let Formspree handle it
         if (this.emailForm) {
-            this.emailForm.addEventListener('submit', (e) => this.handleSubmit(e));
+            this.emailForm.addEventListener('submit', (e) => {
+                // Show loading state
+                this.showLoading();
+                
+                // Let the form submit naturally to Formspree
+                setTimeout(() => {
+                    this.showSuccess();
+                    this.hideLoading();
+                }, 1000);
+            });
         }
         
         // Email input events
         if (this.emailInput) {
             this.emailInput.addEventListener('input', () => this.hideMessages());
-            this.emailInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.handleSubmit(e);
-                }
-            });
         }
         
         // Logo text animation
