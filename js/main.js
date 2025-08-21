@@ -1,4 +1,4 @@
-// Simple JavaScript for khpal.ai landing page
+// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     const emailForm = document.getElementById('emailForm');
     const emailInput = document.getElementById('emailInput');
@@ -9,9 +9,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMessage = document.getElementById('errorMessage');
     const errorText = document.getElementById('errorText');
 
-    // Simple email validation
+    // Enhanced email validation
     function isValidEmail(email) {
-        return email.includes('@') && email.includes('.');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
     // Show loading state
@@ -39,6 +40,11 @@ document.addEventListener('DOMContentLoaded', function() {
         hideMessages();
         successMessage.style.display = 'flex';
         emailInput.value = '';
+        
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 5000);
     }
 
     // Show error message
@@ -46,33 +52,43 @@ document.addEventListener('DOMContentLoaded', function() {
         hideMessages();
         errorText.textContent = message;
         errorMessage.style.display = 'flex';
+        
+        // Auto-hide error message after 5 seconds
+        setTimeout(() => {
+            errorMessage.style.display = 'none';
+        }, 5000);
     }
 
-    // Handle button click
-    const submitButton = document.getElementById('submitButton');
-    submitButton.addEventListener('click', async function(e) {
+    // Handle form submission
+    emailForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
         
         const email = emailInput.value.trim();
         
         // Basic validation
         if (!email) {
             showError('Please enter your email address');
+            emailInput.focus();
             return;
         }
         
         if (!isValidEmail(email)) {
             showError('Please enter a valid email address');
+            emailInput.focus();
             return;
         }
         
-        // Show loading
+        // Show loading state
         showLoading();
         
         try {
-            // Submit to Formspree
+            // Create form data for Formspree
             const formData = new FormData();
             formData.append('email', email);
+            formData.append('_subject', 'New signup from khpal.ai');
+            formData.append('_replyto', email);
             
+            // Submit to Formspree with proper configuration
             const response = await fetch('https://formspree.io/f/mzzvlwgw', {
                 method: 'POST',
                 body: formData,
@@ -81,29 +97,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
+            const data = await response.json();
+            
             if (response.ok) {
                 showSuccess();
                 console.log('Email submitted successfully:', email);
+                
+                // Optional: Track signup event (you can add analytics here)
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'signup', {
+                        event_category: 'engagement',
+                        event_label: 'waitlist'
+                    });
+                }
             } else {
-                throw new Error('Failed to submit');
+                // Handle specific Formspree errors
+                if (data.errors) {
+                    const errorMessages = data.errors.map(error => error.message).join(', ');
+                    showError(`Error: ${errorMessages}`);
+                } else {
+                    showError('Unable to subscribe. Please try again.');
+                }
             }
         } catch (error) {
             console.error('Error submitting email:', error);
-            showError('Something went wrong. Please try again.');
+            showError('Connection error. Please check your internet and try again.');
         } finally {
             hideLoading();
         }
     });
 
     // Hide messages when user starts typing
-    emailInput.addEventListener('input', hideMessages);
-    
-    // Handle Enter key press
-    emailInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            submitButton.click();
-        }
+    emailInput.addEventListener('input', function() {
+        hideMessages();
     });
 
     // Cursor glow effect
@@ -129,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Logo text animation
+    // Logo text animation enhancement
     const logoText = document.getElementById('logoText');
     if (logoText) {
         logoText.addEventListener('mouseenter', function() {
@@ -141,9 +167,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Page animations
-    const elements = document.querySelectorAll('.coming-soon-badge, .main-title, .subtitle, .email-signup');
-    elements.forEach(function(element, index) {
+    // Staggered page load animations
+    const animatedElements = document.querySelectorAll('.coming-soon-badge, .main-title, .subtitle, .email-signup');
+    animatedElements.forEach(function(element, index) {
         element.style.opacity = '0';
         element.style.transform = 'translateY(30px)';
         element.style.transition = 'all 0.6s ease';
@@ -155,39 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Add smooth scrolling for anchor links
-document.addEventListener('DOMContentLoaded', () => {
-    const links = document.querySelectorAll('a[href^="#"]');
-    
-    links.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = document.querySelector(link.getAttribute('href'));
-            
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-});
-
-// Performance optimization: Debounce scroll events
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Add performance optimizations
+// Performance optimizations
 window.addEventListener('load', () => {
     // Lazy load any images if added later
     const images = document.querySelectorAll('img[data-src]');
