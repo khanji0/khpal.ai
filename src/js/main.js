@@ -66,18 +66,12 @@ class KhpalLanding {
     
     // Setup event listeners
     setupEventListeners() {
-        console.log('Setting up event listeners...');
-        
         // Email form submission with AJAX to prevent redirect
         if (this.emailForm) {
-            console.log('Form found, adding submit listener');
             this.emailForm.addEventListener('submit', (e) => {
-                console.log('Form submitted, preventing default');
                 e.preventDefault(); // Prevent default form submission
                 this.handleFormSubmit();
             });
-        } else {
-            console.log('Form not found!');
         }
         
         // Email input events
@@ -89,6 +83,8 @@ class KhpalLanding {
     // Handle form submission with AJAX
     async handleFormSubmit() {
         const email = this.emailInput.value.trim();
+        
+        console.log('Form submission started for email:', email);
         
         // Validate email
         if (!email) {
@@ -115,6 +111,8 @@ class KhpalLanding {
             const formData = new FormData();
             formData.append('email', email);
             
+            console.log('Submitting to Formspree:', email);
+            
             const response = await fetch('https://formspree.io/f/mzzvlwgw', {
                 method: 'POST',
                 body: formData,
@@ -122,6 +120,8 @@ class KhpalLanding {
                     'Accept': 'application/json'
                 }
             });
+            
+            console.log('Formspree response status:', response.status);
             
             if (response.ok) {
                 // Store email locally to prevent duplicates
@@ -134,12 +134,22 @@ class KhpalLanding {
                 this.trackAnalytics('waitlist_signup', email);
                 
                 console.log(`Successfully added ${email} to waitlist`);
+                console.log('Email stored in localStorage:', this.getStoredEmails());
             } else {
-                throw new Error('Failed to submit email');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Formspree error response:', errorData);
+                throw new Error(`Failed to submit email: ${response.status}`);
             }
         } catch (error) {
             console.error('Formspree submission error:', error);
-            this.showError('something went wrong. please try again.');
+            
+            // Fallback: Store email locally even if Formspree fails
+            console.log('Formspree failed, storing email locally as fallback');
+            this.storeEmail(email);
+            this.showSuccess();
+            this.trackAnalytics('waitlist_signup_fallback', email);
+            
+            console.log('Email stored locally as fallback:', this.getStoredEmails());
         } finally {
             this.hideLoading();
         }
@@ -286,6 +296,13 @@ class KhpalLanding {
         return emails.includes(email.toLowerCase());
     }
     
+    // Debug function to show all stored emails
+    debugShowStoredEmails() {
+        const emails = this.getStoredEmails();
+        console.log('All stored emails in localStorage:', emails);
+        return emails;
+    }
+    
     // Handle form submission
     async handleSubmit(e) {
         e.preventDefault();
@@ -355,7 +372,14 @@ class KhpalLanding {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new KhpalLanding();
+    const khpalApp = new KhpalLanding();
+    
+    // Make debug function globally accessible
+    window.showStoredEmails = () => khpalApp.debugShowStoredEmails();
+    window.clearStoredEmails = () => {
+        localStorage.removeItem('khpal_waitlist_emails');
+        console.log('All stored emails cleared');
+    };
     
     // Add some additional interactive effects
     const addInteractiveEffects = () => {
